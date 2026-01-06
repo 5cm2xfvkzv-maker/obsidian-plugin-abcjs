@@ -1,0 +1,104 @@
+# ---------------------------------------------------------
+# PYTHON SCRIPT: 10-PART ANTHEM GENERATOR
+# ---------------------------------------------------------
+# 1. Copy this code.
+# 2. Paste into Google Colab or a Python IDE.
+# 3. Run it.
+# 4. It will save 'anthem_full_arrangement.mid' to your files.
+# ---------------------------------------------------------
+
+!pip install midiutil  # Installs the necessary library
+
+from midiutil import MIDIFile
+
+def create_full_anthem():
+    # Create MIDI object with 10 tracks (10 Voices)
+    midi = MIDIFile(10)
+
+    # Setup: Tempo and Tracks
+    track_names = ["Soprano 1", "Soprano 2", "Alto 1", "Alto 2", "Tenor 1", 
+                   "Tenor 2", "Baritone 1", "Baritone 2", "Bass 1", "Bass 2"]
+    
+    for i in range(10):
+        midi.addTrackName(i, 0, track_names[i])
+        midi.addTempo(i, 0, 75) # Majestic Tempo
+
+    # -------------------------------------------------------
+    # DATA: The Note Stacks (From High Soprano to Low Bass)
+    # Numbers are MIDI Pitch (60 = Middle C)
+    # -------------------------------------------------------
+    
+    # SECTION 1: THE OPENING ("Oh, say can you see")
+    # Lush, Cinematic Jazz Harmony
+    chords_section_1 = [
+        # "Oh" (Bb Maj 9)
+        [77, 74, 72, 70, 65, 62, 60, 58, 53, 46], 
+        # "Say" (F13 / A)
+        [74, 72, 67, 75, 62, 60, 57, 55, 51, 45],
+        # "Can" (Bb Maj 7)
+        [70, 69, 67, 65, 62, 60, 58, 53, 50, 46],
+        # "You" (D7 / F#)
+        [74, 72, 69, 66, 63, 60, 57, 50, 48, 42],
+        # "See" (G Min 11)
+        [77, 76, 72, 69, 67, 65, 62, 60, 58, 43]
+    ]
+
+    # SECTION 2: THE ROCKETS ("And the rockets' red glare")
+    # Call and Response: Low Brass vs High Winds
+    chords_section_2 = [
+        # "And The" (Unison Pickup)
+        [77, 74, 70, 65, 62, 58, 53, 53, 53, 53], 
+        # "ROCK-" (Low Voices Only - High Voices Rest/Zero)
+        [0, 0, 0, 0, 0, 0, 65, 62, 58, 53],
+        # "-ETS" (Low Voices Only)
+        [0, 0, 0, 0, 0, 0, 64, 60, 57, 53],
+        # "RED" (High Voices Blast - G7)
+        [86, 83, 79, 77, 74, 71, 52, 55, 52, 52],
+        # "GLARE" (High Voices Blast - C/E)
+        [86, 84, 79, 76, 72, 67, 52, 55, 48, 48]
+    ]
+
+    # SECTION 3: THE FINALE ("Land of the free...")
+    # The Jacob Collier Lydian Ending
+    chords_section_3 = [
+        # "Land" (Ab Maj 9)
+        [75, 72, 70, 67, 63, 60, 55, 51, 48, 44],
+        # "Free" (Gb Maj 9 #11 - THE SURPRISE)
+        [77, 76, 73, 70, 68, 65, 61, 58, 42, 30],
+        # "Home" (G7)
+        [74, 71, 67, 65, 62, 59, 55, 53, 50, 43],
+        # "Brave" (Bb Maj 13 #11 - THE LYDIAN STACK)
+        # Includes the E Natural (MIDI 64) for the shimmer
+        [70, 69, 67, 64, 60, 53, 50, 45, 41, 34]
+    ]
+
+    # Combine all sections
+    full_progression = chords_section_1 + chords_section_2 + chords_section_3
+
+    # -------------------------------------------------------
+    # GENERATOR LOOP
+    # -------------------------------------------------------
+    time = 0
+    duration = 2  # Standard chord length
+    
+    for chord in full_progression:
+        # Check if it's the "Rockets" section (some voices constitute rests)
+        # MIDI 0 is invalid for pitch, so we skip those notes to create silence.
+        
+        for voice_index, pitch in enumerate(chord):
+            if pitch > 0: # Only play if pitch is valid (not a rest)
+                # Volume logic: Make the "Red Glare" (Section 2) louder
+                vol = 100
+                if pitch > 80: vol = 120 # Scream the high notes
+                
+                midi.addNote(voice_index, 0, pitch, time, duration, vol)
+        
+        time += duration
+
+    # Save the file
+    with open("anthem_full_arrangement.mid", "wb") as output_file:
+        midi.writeFile(output_file)
+    print("SUCCESS! Download 'anthem_full_arrangement.mid' from the files menu.")
+
+if __name__ == "__main__":
+    create_full_anthem()
